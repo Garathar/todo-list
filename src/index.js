@@ -1,18 +1,35 @@
-let projectList = [{
+
+let projectList = [
+    {
     title: "My project",
+    id: crypto.randomUUID(),
     lists: [
-        {
-            title: "My todo list",
-            description: "This is the default list, for everyday tasks",
-            tasks: []
-        }
-    ]
-}];
+            {
+                title: "My todo list",
+                description: "This is the default list, for everyday tasks",
+                id: crypto.randomUUID(),
+                tasks: []
+            }
+        ]
+    },
+    {
+    title: "My 2nd test project",
+    lists: [
+            {
+                title: "My test list of 2nd",
+                description: "This list is for testing",
+                id: crypto.randomUUID(),
+                tasks: []
+            }
+        ]
+    },
+];
 
 
 let defaultList = {
     title: "My todo list",
-    tasks: []
+    tasks: [],
+    id: crypto.randomUUID()
 }
 
 
@@ -38,6 +55,7 @@ subBtn.addEventListener("click",(event)=>{
     description.value = "";
     dueDate.value = "";
     document.getElementById("priority").checked = false;
+    document.getElementById("addTask").close();
 })
 
 function showList(){
@@ -76,13 +94,19 @@ function sideBarDisplay(){
         projectSummary.innerText = project.title;
         project.lists.forEach((list) => {
             const listItem = document.createElement("li");
-            const listTitle = document.createElement("p")
-            listTitle.innerText = list.title
-            listItem.appendChild(listTitle)
+            const listTitle = document.createElement("p");
+            const taskBtn = document.createElement("button");
+            taskBtn.innerText = "Add task"
+            taskBtn.addEventListener("click",()=>{
+                dialogCreationTest(list.tasks)
+            })
+            listItem.appendChild(taskBtn)
+            listTitle.innerText = list.title;
+            listItem.appendChild(listTitle);
             listItem.addEventListener("click",(list)=>{
                 showList(list)
-            })
-            listForLists.appendChild(listItem)
+            });
+            listForLists.appendChild(listItem);
         })
         projectDetail.appendChild(listForLists)
         projectDetail.appendChild(projectSummary)
@@ -92,3 +116,79 @@ function sideBarDisplay(){
 }
 
 sideBarDisplay();
+
+function dialogCreationTest(task){
+    let createDialog = document.createElement("dialog");
+    const formContainer = document.createElement("form");
+    createDialog.id = "taskDialog";
+    const titleDiv = document.createElement("div");
+    let dialogLabel = document.createElement("label");
+    dialogLabel.innerText = "Name the task: ";
+    dialogLabel.setAttribute("for","title")
+    let dialogTitleInput = document.createElement("input");
+    Object.assign(dialogTitleInput,{
+        type: "text",
+        name: "title",
+        id: "title"
+    })
+    titleDiv.appendChild(dialogLabel);
+    titleDiv.appendChild(dialogTitleInput);
+    formContainer.appendChild(titleDiv);
+
+    const areaDiv = document.createElement("div");
+    let areaLabel = document.createElement("label");
+    let dialogTextArea = document.createElement("textarea");
+    areaLabel.innerText = "Describe the task: ";
+    areaLabel.setAttribute("for","area");
+    Object.assign(dialogTextArea,{
+        rows: "10",
+        cols: "30",
+        id: "area"
+    })
+    areaDiv.appendChild(areaLabel);
+    areaDiv.appendChild(dialogTextArea);
+    formContainer.appendChild(areaDiv);
+
+    const dateDiv = document.createElement("div");
+    let dateLabel = document.createElement("label");
+    dateLabel.innerText = "Set the due for the task: ";
+    dateLabel.setAttribute("for","dialogDate");
+    let dialogDueDate = document.createElement("input");
+    Object.assign(dialogDueDate,{
+        name: "dialogDate",
+        type: "date",
+        id: "dialogDate"
+    })
+    dateDiv.appendChild(dateLabel);
+    dateDiv.appendChild(dialogDueDate);
+    formContainer.appendChild(dateDiv);
+
+    const priorityDiv = document.createElement("div");
+    let priorityLabel = document.createElement("label");
+    priorityLabel.innerText = "Check if it's a priority task: "
+    priorityLabel.setAttribute("for","dialogPriority");
+    let dialogCheckPriority = document.createElement("input");
+    Object.assign(dialogCheckPriority,{
+        name: "dialogPriority",
+        type: "checkbox",
+        id: "dialogPriority"
+    })
+    priorityDiv.appendChild(priorityLabel);
+    priorityDiv.appendChild(dialogCheckPriority);
+    formContainer.appendChild(priorityDiv);
+
+    let closeBtn = document.createElement("button");
+    closeBtn.innerText = "Close";
+    Object.assign(closeBtn,{
+        onclick: function(){
+            taskDialog.close()
+        }
+    })
+    formContainer.appendChild(closeBtn)
+    createDialog.appendChild(formContainer);
+    document.getElementById("content").appendChild(createDialog);
+    createDialog.showModal()
+    createDialog.addEventListener("close",()=>{
+        document.getElementById("content").removeChild(createDialog);
+    })
+}
