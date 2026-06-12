@@ -1,23 +1,16 @@
+body{
+    margin: 0;
+}
+
 form{
     display: flex;
     flex-direction: column;
-}
-.list-item{
-    background-color: yellow;
-    border: solid black 3px;
-}
-.list-item:hover{
-    background-color: aqua;
-}
-
-.list-item.extended{
-    background-color: chartreuse;
 }
 
 #content{
     display: grid;
     grid-template-columns: 1fr 2fr;
-    grid-template-rows: 1fr 3fr;
+    grid-template-rows: 1fr 8fr;
 }
 
 header{
@@ -26,6 +19,7 @@ header{
 }
 
 #sidebar{
+    height: 100vh;
     grid-area: 2 / 1 / 3 / 2;
     background-color: blanchedalmond;
 }
@@ -51,4 +45,23 @@ summary{
 #projectsLabelMain{
     font-size: 1.5em;
     font-weight: bold;
+}
+
+li{
+    list-style-type: none;
+}
+
+ul{
+    padding: 0;
+}
+
+li>button{
+    border: none;
+    background: transparent;
+    font-size: 20px;
+}
+
+details>ul>li{
+    display: flex;
+    gap: 10px;
 }
