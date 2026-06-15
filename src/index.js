@@ -18,7 +18,9 @@ let projectList = [
 function todoItem(title,description,dueDate,priority){
     return {title: title, description: description, dueDate: dueDate, priority: priority}
 }
-
+function listItem(title,description){
+    return {title: title, description: description, id: crypto.randomUUID(), tasks: []}
+}
 
 function showList(list){
     let listContainer = document.getElementById("listContainer");
@@ -63,12 +65,19 @@ function sideBarDisplay(){
         const projectSummary = document.createElement("summary");
         const listForLists = document.createElement("ul");
         const renameProjectBtn = document.createElement("button");
+        const addListBtn = document.createElement("button");
         renameProjectBtn.innerText = "R";
         renameProjectBtn.setAttribute("title","Rename project");
         renameProjectBtn.addEventListener("click",()=>{
             rename(project,"false");
-        })
-        projectItem.appendChild(renameProjectBtn)
+        });
+        projectItem.appendChild(renameProjectBtn);
+        addListBtn.innerText = "+";
+            addListBtn.setAttribute("title","Add task");
+            addListBtn.addEventListener("click",()=>{
+                dialogCreationTest(project.lists,"")
+        });
+        projectItem.appendChild(addListBtn)
         projectSummary.innerText = project.title;
         project.lists.forEach((list) => {
             const listItem = document.createElement("li");
@@ -78,7 +87,7 @@ function sideBarDisplay(){
             taskBtn.innerText = "+";
             taskBtn.setAttribute("title","Add task");
             taskBtn.addEventListener("click",()=>{
-                dialogCreationTest(list.tasks)
+                dialogCreationTest(list.tasks,"true")
             })
             renameBtn.innerText = "R";
             renameBtn.setAttribute("title","Rename list");
@@ -103,13 +112,13 @@ function sideBarDisplay(){
 
 sideBarDisplay();
 
-function dialogCreationTest(task){
+function dialogCreationTest(task,checker){
     let createDialog = document.createElement("dialog");
     const formContainer = document.createElement("form");
     createDialog.id = "taskDialog";
     const titleDiv = document.createElement("div");
     let dialogLabel = document.createElement("label");
-    dialogLabel.innerText = "Name the task: ";
+    dialogLabel.innerText = "Title: ";
     dialogLabel.setAttribute("for","title")
     let dialogTitleInput = document.createElement("input");
     Object.assign(dialogTitleInput,{
@@ -124,7 +133,7 @@ function dialogCreationTest(task){
     const areaDiv = document.createElement("div");
     let areaLabel = document.createElement("label");
     let dialogTextArea = document.createElement("textarea");
-    areaLabel.innerText = "Describe the task: ";
+    areaLabel.innerText = "Describe the entry: ";
     areaLabel.setAttribute("for","description");
     Object.assign(dialogTextArea,{
         rows: "10",
@@ -134,40 +143,40 @@ function dialogCreationTest(task){
     areaDiv.appendChild(areaLabel);
     areaDiv.appendChild(dialogTextArea);
     formContainer.appendChild(areaDiv);
+    if (checker == "true"){
+        const dateDiv = document.createElement("div");
+        let dateLabel = document.createElement("label");
+        dateLabel.innerText = "Set the due for the task: ";
+        dateLabel.setAttribute("for","dueDate");
+        let dialogDueDate = document.createElement("input");
+        Object.assign(dialogDueDate,{
+            name: "dueDate",
+            type: "date",
+            id: "dueDate"
+        })
+        dateDiv.appendChild(dateLabel);
+        dateDiv.appendChild(dialogDueDate);
+        formContainer.appendChild(dateDiv);
 
-    const dateDiv = document.createElement("div");
-    let dateLabel = document.createElement("label");
-    dateLabel.innerText = "Set the due for the task: ";
-    dateLabel.setAttribute("for","dueDate");
-    let dialogDueDate = document.createElement("input");
-    Object.assign(dialogDueDate,{
-        name: "dueDate",
-        type: "date",
-        id: "dueDate"
-    })
-    dateDiv.appendChild(dateLabel);
-    dateDiv.appendChild(dialogDueDate);
-    formContainer.appendChild(dateDiv);
-
-    const priorityDiv = document.createElement("div");
-    let priorityLabel = document.createElement("label");
-    priorityLabel.innerText = "Check if it's a priority task: "
-    priorityLabel.setAttribute("for","priority");
-    let dialogCheckPriority = document.createElement("input");
-    Object.assign(dialogCheckPriority,{
-        name: "priority",
-        type: "checkbox",
-        id: "priority"
-    })
-    priorityDiv.appendChild(priorityLabel);
-    priorityDiv.appendChild(dialogCheckPriority);
-    formContainer.appendChild(priorityDiv);
-
+        const priorityDiv = document.createElement("div");
+        let priorityLabel = document.createElement("label");
+        priorityLabel.innerText = "Check if it's a priority task: "
+        priorityLabel.setAttribute("for","priority");
+        let dialogCheckPriority = document.createElement("input");
+        Object.assign(dialogCheckPriority,{
+            name: "priority",
+            type: "checkbox",
+            id: "priority"
+        })
+        priorityDiv.appendChild(priorityLabel);
+        priorityDiv.appendChild(dialogCheckPriority);
+        formContainer.appendChild(priorityDiv);
+    }
     let closeBtn = document.createElement("button");
     closeBtn.innerText = "Submit";
     closeBtn.addEventListener("click",(event) => {
         event.preventDefault();
-        addTodo(task);
+        addTodo(task,checker);
     })
     formContainer.appendChild(closeBtn);
     createDialog.appendChild(formContainer);
@@ -178,22 +187,32 @@ function dialogCreationTest(task){
     })
 }
 
-function addTodo(task){
+function addTodo(task,checker){
     const title = document.getElementById("title");
     const description = document.getElementById("description");
-    const dueDate = document.getElementById("dueDate");
-    let priority = document.getElementById("priority");
-    if(priority.checked){
-        priority = true;
+    if(checker == "true"){
+        const dueDate = document.getElementById("dueDate");
+        let priority = document.getElementById("priority");
+        if(priority.checked){
+            priority = true;
+        }
+        else{
+            priority = false;
+        };
+        task.push(todoItem(title.value,description.value,dueDate.value,priority));
     }
     else{
-        priority = false;
-    };
-    task.push(todoItem(title.value,description.value,dueDate.value,priority));
+        task.push(listItem(title.value,description.value));
+    }
     title.value = "";
     description.value = "";
-    dueDate.value = "";
-    document.getElementById("priority").checked = false;
+    if(checker == "true"){
+        dueDate.value = "";
+        document.getElementById("priority").checked = false;
+    }
+    if(checker != "true"){
+        sideBarDisplay();
+    }
     document.getElementById("taskDialog").close();
 }
 
