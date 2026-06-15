@@ -15,13 +15,6 @@ let projectList = [
 ];
 
 
-let defaultList = {
-    title: "My todo list",
-    tasks: [],
-    id: crypto.randomUUID()
-}
-
-
 function todoItem(title,description,dueDate,priority){
     return {title: title, description: description, dueDate: dueDate, priority: priority}
 }
@@ -63,22 +56,37 @@ function addTask(currentList){
 
 function sideBarDisplay(){
     const projectContainer = document.getElementById("projectList");
+    projectContainer.innerHTML = "";
     projectList.forEach((project) => {
         const projectItem = document.createElement("li");
         const projectDetail = document.createElement("details");
         const projectSummary = document.createElement("summary");
         const listForLists = document.createElement("ul");
+        const renameProjectBtn = document.createElement("button");
+        renameProjectBtn.innerText = "R";
+        renameProjectBtn.setAttribute("title","Rename project");
+        renameProjectBtn.addEventListener("click",()=>{
+            rename(project,"false");
+        })
+        projectItem.appendChild(renameProjectBtn)
         projectSummary.innerText = project.title;
         project.lists.forEach((list) => {
             const listItem = document.createElement("li");
             const listTitle = document.createElement("p");
             const taskBtn = document.createElement("button");
-            taskBtn.innerText = "+"
-            taskBtn.setAttribute("title","Add task")
+            const renameBtn = document.createElement("button");
+            taskBtn.innerText = "+";
+            taskBtn.setAttribute("title","Add task");
             taskBtn.addEventListener("click",()=>{
                 dialogCreationTest(list.tasks)
             })
-            listItem.appendChild(taskBtn)
+            renameBtn.innerText = "R";
+            renameBtn.setAttribute("title","Rename list");
+            renameBtn.addEventListener("click",()=>{
+                rename(list,"true");
+            })
+            listItem.appendChild(taskBtn);
+            listItem.appendChild(renameBtn);
             listTitle.innerText = list.title;
             listItem.appendChild(listTitle);
             listItem.addEventListener("click",()=>{
@@ -187,4 +195,102 @@ function addTodo(task){
     dueDate.value = "";
     document.getElementById("priority").checked = false;
     document.getElementById("taskDialog").close();
+}
+
+
+function rename(object,isItList){
+    const renameDia = document.createElement("dialog");
+    const renameForm = document.createElement("form");
+    const renameInputLabel = document.createElement("label");
+    const renameInput = document.createElement("input");
+    const renameBtn = document.createElement("button");
+    renameDia.id = "renameDia";
+    renameInputLabel.innerText = "Enter new name: ";
+    renameInputLabel.setAttribute("for","renameInput");
+    renameForm.appendChild(renameInputLabel);
+    Object.assign(renameInput,{
+        type: "text",
+        name: "renameInput",
+        id: "renameInput",
+        value: object.title
+    })
+    renameForm.appendChild(renameInput);
+    renameBtn.innerText = "Submit";
+    renameBtn.addEventListener("click",(event)=>{
+        event.preventDefault();
+        let newName = document.getElementById("renameInput");
+        object.title = newName.value;
+        newName.value = "";
+        sideBarDisplay()
+        renameDia.close();
+    })
+    renameForm.appendChild(renameBtn);
+    renameDia.appendChild(renameForm);
+    document.getElementById("content").appendChild(renameDia);
+    renameDia.showModal()
+    renameDia.addEventListener("close",()=>{
+        if (isItList == "true"){
+            showList(object)
+        };
+        document.getElementById("content").removeChild(renameDia);
+    })
+}
+
+
+const addProjectBtn = document.getElementById("addProject")
+addProjectBtn.addEventListener("click",()=>{
+    const projectDialog = document.createElement("dialog");
+    const projectForm = document.createElement("form");
+    const projectInputLabel = document.createElement("label");
+    const projectInput = document.createElement("input");
+    const projectSubBtn = document.createElement("button");
+    const projectCancelBtn = document.createElement("button");
+    projectInputLabel.innerText = "Name the new project: "
+    projectInputLabel.setAttribute("for","projectInput");
+    Object.assign(projectInput,{
+        type: "text",
+        name: "projectInput",
+        id: "projectInput"
+    })
+    projectForm.appendChild(projectInputLabel);
+    projectForm.appendChild(projectInput);
+    projectSubBtn.innerText = "Submit"
+    projectSubBtn.addEventListener("click",(event)=>{
+        event.preventDefault();
+        projectList.push(addProject(document.getElementById("projectInput").value));
+        document.getElementById("projectInput").value = "";
+        sideBarDisplay();
+        projectDialog.close();
+    })
+    projectForm.appendChild(projectSubBtn);
+    projectCancelBtn.innerText = "Cancel"
+    projectCancelBtn.addEventListener("click",(event)=>{
+        event.preventDefault();
+        document.getElementById("projectInput").value = "";
+        projectDialog.close();
+    })
+    projectForm.appendChild(projectCancelBtn);
+    projectDialog.appendChild(projectForm);
+    document.getElementById("content").appendChild(projectDialog);
+    projectDialog.showModal()
+    projectDialog.addEventListener("close",()=>{
+        document.getElementById("content").removeChild(projectDialog);
+    })
+})
+
+function addProject(newProject){
+    return {
+        title: newProject,
+        id: crypto.randomUUID(),
+        lists: []
+    }
+}
+
+function addList(newList,newDescription){
+    return{
+        title: newList,
+        description: newDescription,
+        id: crypto.randomUUID(),
+        lists: []        
+    }
 }

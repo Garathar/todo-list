@@ -65,3 +65,11 @@ details>ul>li{
     display: flex;
     gap: 10px;
 }
+
+#projectList>li{
+    display: flex;
+    border: solid 2px black;
+}
+#projectList>li>details{
+    border: none;
+}
