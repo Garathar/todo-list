@@ -1,4 +1,3 @@
-
 let projectList = [
     {
     title: "My project",
@@ -16,13 +15,13 @@ let projectList = [
 
 
 function todoItem(title,description,dueDate,priority){
-    return {title: title, description: description, dueDate: dueDate, priority: priority}
+    return {title: title, description: description, dueDate: dueDate, priority: priority, done: false, id: crypto.randomUUID()}
 }
 function listItem(title,description){
     return {title: title, description: description, id: crypto.randomUUID(), tasks: []}
 }
 
-function showList(list){
+function showList(list,project){
     let listContainer = document.getElementById("listContainer");
     listContainer.innerHTML = "";
     const visibleListContainer = document.createElement("div");
@@ -33,15 +32,48 @@ function showList(list){
     visibleListContainer.appendChild(visibleListTitle);
     visibleListContainer.appendChild(visibleListDescription);
     listContainer.appendChild(visibleListContainer);
-    addTask(list);
+    addTask(list,project);
 }
 
-function addTask(currentList){
-    currentList.tasks.forEach((task) =>{
+function addTask(list,project){
+    const taskListContainer = document.createElement("ul");
+    list.tasks.forEach((task) =>{
+        const taskContainer = document.createElement("li");
+        const taskDoneBtn = document.createElement("button");
+        const removeTask = document.createElement("button");
+        if (task.done == false){
+            taskDoneBtn.innerText = "✓";
+            taskDoneBtn.setAttribute("title","Task finished");
+        }
+        else{
+            taskContainer.classList.add("done")
+            taskDoneBtn.innerText = "x";
+            taskDoneBtn.setAttribute("title","Task not finished");
+        }
+        taskDoneBtn.addEventListener("click",()=>{
+            if (taskContainer.classList.contains("done") != true){
+                taskContainer.classList.add("done");
+                taskDoneBtn.innerText = "x";
+                taskDoneBtn.setAttribute("title","Task not finished")
+                task.done = true;
+            }
+            else{
+                taskContainer.classList.remove("done");
+                taskDoneBtn.setAttribute("title","Task finished")
+                taskDoneBtn.innerText = "✓"
+                task.done = false;
+            }
+        })
+        removeTask.innerText = "-";
+        removeTask.setAttribute("title","Remove task");
+        removeTask.addEventListener("click",()=>{
+            remove(task.id,list.id,project.id)
+        })
+        taskContainer.appendChild(taskDoneBtn);
         let detail = document.createElement("details");
         let summery = document.createElement("summary");
         if (task.priority === true){
-            detail.classList.add("priority")
+            taskContainer.classList.add("priority")
         };
         let summaryTitle = document.createElement("p");
         let summaryDue = document.createElement("p");
@@ -51,8 +83,11 @@ function addTask(currentList){
         summery.appendChild(summaryDue);
         detail.innerText = `${task.description}`;      
         detail.appendChild(summery);
-        listContainer.appendChild(detail);
+        taskContainer.appendChild(detail);
+        taskContainer.appendChild(removeTask);
+        taskListContainer.appendChild(taskContainer)
     })
+    listContainer.appendChild(taskListContainer);
 }
 
 
@@ -66,6 +101,7 @@ function sideBarDisplay(){
         const listForLists = document.createElement("ul");
         const renameProjectBtn = document.createElement("button");
         const addListBtn = document.createElement("button");
+        const removeProjectBtn = document.createElement("button")
         renameProjectBtn.innerText = "R";
         renameProjectBtn.setAttribute("title","Rename project");
         renameProjectBtn.addEventListener("click",()=>{
@@ -78,12 +114,19 @@ function sideBarDisplay(){
                 dialogCreationTest(project.lists,"")
         });
         projectItem.appendChild(addListBtn)
+        removeProjectBtn.innerText = "-";
+        removeProjectBtn.setAttribute("title","Remove project")
+        removeProjectBtn.addEventListener("click",()=>{
+            remove(project.id,"project","")
+        })
+        projectItem.appendChild(removeProjectBtn);
         projectSummary.innerText = project.title;
         project.lists.forEach((list) => {
             const listItem = document.createElement("li");
             const listTitle = document.createElement("p");
             const taskBtn = document.createElement("button");
             const renameBtn = document.createElement("button");
+            const removeListBtn = document.createElement("button")
             taskBtn.innerText = "+";
             taskBtn.setAttribute("title","Add task");
             taskBtn.addEventListener("click",()=>{
@@ -94,12 +137,18 @@ function sideBarDisplay(){
             renameBtn.addEventListener("click",()=>{
                 rename(list,"true");
             })
+            removeListBtn.innerText = "-";
+            removeListBtn.setAttribute("title","Remove project")
+            removeListBtn.addEventListener("click",()=>{
+            remove(list.id,project.id,"list")
+            })
             listItem.appendChild(taskBtn);
+            listItem.appendChild(removeListBtn);
             listItem.appendChild(renameBtn);
             listTitle.innerText = list.title;
             listItem.appendChild(listTitle);
             listItem.addEventListener("click",()=>{
-                showList(list)
+                showList(list,project)
             });
             listForLists.appendChild(listItem);
         })
@@ -248,9 +297,6 @@ function rename(object,isItList){
     document.getElementById("content").appendChild(renameDia);
     renameDia.showModal()
     renameDia.addEventListener("close",()=>{
-        if (isItList == "true"){
-            showList(object)
-        };
         document.getElementById("content").removeChild(renameDia);
     })
 }
@@ -312,4 +358,25 @@ function addList(newList,newDescription){
         id: crypto.randomUUID(),
         lists: []        
     }
+}
+
+function remove(element,parent,grandparent){
+    const itID = element
+    if (parent == "project"){
+       const itemIndex = projectList.indexOf(projectList.find(item => item.id == itID))
+       projectList.splice(itemIndex,1);
+    }
+    else if(grandparent == "list"){
+        const parentProject = projectList.indexOf(projectList.find(item => item.id == parent))
+        const itemIndex = projectList[parentProject].lists.indexOf(projectList[parentProject].lists.find(list => list.id == element))
+        projectList[parentProject].lists.splice(itemIndex,1);
+    }
+    else{
+        const grandParentIndex = projectList.indexOf(projectList.find(item => item.id == grandparent));
+        const parentIndex = projectList[grandParentIndex].lists.indexOf(projectList[grandParentIndex].lists.find(list => list.id == parent));
+        const itemIndex = projectList[grandParentIndex].lists[parentIndex].tasks.indexOf(projectList[grandParentIndex].lists[parentIndex].tasks.find(task => task.id == element));
+        projectList[grandParentIndex].lists[parentIndex].tasks.splice(itemIndex,1);
+    } 
+    sideBarDisplay();
+    document.getElementById("listContainer").innerHTML = "";
 }
