@@ -1,19 +1,14 @@
-let projectList = [
-    {
-    title: "My project",
-    id: crypto.randomUUID(),
-    lists: [
-            {
-                title: "My todo list",
-                description: "This is the default list, for everyday tasks",
-                id: crypto.randomUUID(),
-                tasks: []
-            }
-        ]
-    },
-];
+import { sideBarDisplay } from "./sidebarshow.js";
+import { btnAddProject } from "./addproject.js";
+import { listCheck } from "./projectlist.js";
+import "./style.css"
 
+sideBarDisplay();
+btnAddProject();
 
+//The original code, just in case something explodes
+
+/*
 function todoItem(title,description,dueDate,priority){
     return {title: title, description: description, dueDate: dueDate, priority: priority, done: false, id: crypto.randomUUID()}
 }
@@ -351,15 +346,6 @@ function addProject(newProject){
     }
 }
 
-function addList(newList,newDescription){
-    return{
-        title: newList,
-        description: newDescription,
-        id: crypto.randomUUID(),
-        lists: []        
-    }
-}
-
 function remove(element,parent,grandparent){
     const itID = element
     if (parent == "project"){
@@ -380,3 +366,4 @@ function remove(element,parent,grandparent){
     sideBarDisplay();
     document.getElementById("listContainer").innerHTML = "";
 }
+    */
